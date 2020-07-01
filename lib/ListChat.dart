@@ -1,6 +1,9 @@
+import 'package:appchat/ChangeInfor.dart';
+import 'package:appchat/Chat.dart';
 import 'package:appchat/SharedPreferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -44,6 +47,8 @@ class _ListChat extends State<ListChat> {
                   ),
                   onTap: (){
                     Fluttertoast.showToast(msg: "Click");
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ChangeInfor()));
+
                   },
                 );
               }
@@ -65,8 +70,8 @@ class _ListChat extends State<ListChat> {
                   ),
                   child: ListTile(
                     onTap: (){
-                      Fluttertoast.showToast(msg: documentSnapshot['id']);
-                      print(documentSnapshot['id'].hashCode);
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatBox()));
+
                     },
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(documentSnapshot['photoUrl']),
