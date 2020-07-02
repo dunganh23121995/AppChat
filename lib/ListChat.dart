@@ -69,8 +69,11 @@ class _ListChat extends State<ListChat> {
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   child: ListTile(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatBox()));
+                    onTap: ()async{
+                      String currentid = await  MySharedPrefereces.Init().getUid();
+                      String peerid = await documentSnapshot['id'];
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatBox(currentId: currentid
+                     ,peerId: peerid,)));
 
                     },
                     leading: CircleAvatar(

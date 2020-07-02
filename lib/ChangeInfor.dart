@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:path/path.dart' as Path;
 class ChangeInfor extends StatefulWidget{
   int idcurrent,idreender;
 
@@ -68,7 +69,7 @@ class _ChangeInfor extends State<ChangeInfor>{
     photoUrl = await pres.getPhotoUrl();
   }
   _getImagePicker()async{
-    var pickedFile;
+    PickedFile pickedFile;
 
     await showModalBottomSheet(
         context: context,
@@ -97,6 +98,7 @@ class _ChangeInfor extends State<ChangeInfor>{
               onTap: ()async{
                 pickedFile = await ImagePicker().getImage(source: ImageSource.gallery);
                 setState(() {
+                  if(pickedFile.path !=null)
                   avatarImageFile = File(pickedFile.path);
                   Navigator.pop(context);
                 });
@@ -112,54 +114,19 @@ class _ChangeInfor extends State<ChangeInfor>{
 
   }
   Future uploadFile() async {
-    String fileName = id;
-    StorageReference reference = FirebaseStorage.instance.ref().child(fileName);
-    print(fileName);
-    print(avatarImageFile);
-    StorageUploadTask uploadTask = reference.putFile(avatarImageFile);
-    StorageTaskSnapshot storageTaskSnapshot;
-    uploadTask.onComplete.then((value) {
-      if (value.error == null) {
-        storageTaskSnapshot = value;
-        storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
-          photoUrl = downloadUrl;
-          Firestore.instance
-              .collection('users')
-              .document(id)
-              .updateData({
-            'nickname': nickname,
-            'photoUrl': photoUrl
-          }).then((data) async {
-            await MySharedPrefereces.Init().setPhotoUrl(photoUrl);
-            setState(() {
-//              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: "Upload success");
-          }).catchError((err) {
-            setState(() {
-//              isLoading = false;
-            });
-            Fluttertoast.showToast(msg: err.toString());
-          });
-        },
-            onError: (err)
-        {
-          setState(() {
-//            isLoading = false;
-          });
-          Fluttertoast.showToast(msg: 'This file is not an image1');
-        });
-      } else {
-        setState(() {
-//          isLoading = false;
-        });
-        Fluttertoast.showToast(msg: 'This file is not an image2 ${value.error}');
-      }
-    }, onError: (err) {
+    print(avatarImageFile.path);
+    StorageReference storageReference = FirebaseStorage.instance
+        .ref()
+        .child('${Path.basename(avatarImageFile.path)}');
+    print(Path.basename(avatarImageFile.path));
+    StorageUploadTask uploadTask = storageReference.putFile(avatarImageFile);
+    await uploadTask.onComplete;
+    print('File Uploaded');
+    storageReference.getDownloadURL().then((fileURL) {
       setState(() {
-//        isLoading = false;
+        photoUrl = fileURL;
+        MySharedPrefereces.Init().setPhotoUrl(photoUrl);
       });
-      Fluttertoast.showToast(msg: err.toString());
     });
   }
 
